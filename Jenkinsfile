@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE   = "rankraze-ca-backend"
         CONTAINER_NAME = "rankraze-ca-backend-container"
-        APP_PORT       = "6005"
+        APP_PORT       = "6007"
 
         HOST_UPLOAD_DIR = "/home/rankraze/uploads"
         CONTAINER_UPLOAD_DIR = "/app/uploads"
