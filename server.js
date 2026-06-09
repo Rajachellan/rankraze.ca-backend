@@ -13,6 +13,12 @@ const authRouter = require("./routes/authRoutes");
 const statsRouter = require("./routes/statsRoutes");
 const adminUserRouter = require("./routes/adminUserRoutes");
 
+//WEBSITE PORTFOLIO ROUTES
+const websiteportfolioRoutes=require('./routes/websitePortfolioRoutes.js')
+
+//SOCIAL MEDIA PORTFOLIO ROUTER
+const socialMediaPortfolioRouter=require('./routes/socialMediaPortfolioRoute.js')
+
 const mongoose = require("mongoose");
 
 const app = express();
@@ -71,6 +77,10 @@ app.get("/health", (req, res) => {
   });
 });
 
+// TO SEE IMAGES ON FRONTEND
+app.use("/api/wbUploads", express.static(path.join(__dirname,"/wbUpload")));
+app.use("/api/smUploads", express.static(path.join(__dirname,"/smUpload")));
+
 app.use("/api", formRouter);
 app.use("/api", jobApplyRouter);
 app.use("/api", jobPostRouter);
@@ -78,6 +88,9 @@ app.use("/api", blogRouter);
 app.use("/api", statsRouter);
 app.use("/api", adminUserRouter);
 app.use("/api/auth", authRouter);
+app.use("/api", websiteportfolioRoutes);
+app.use('/api',socialMediaPortfolioRouter)
+
 
 // Webhook URL is currently not needed
 // console.log("Loaded webhook URL:", process.env.TEAMS_WEBHOOK_URL_CAREERS);
