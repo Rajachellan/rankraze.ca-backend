@@ -7,6 +7,7 @@ const formSchema = new mongoose.Schema(
     phone: { type: String, required: true },
     subject: { type: String },
     message: { type: String },
+    source: { type: String, default: "unknown" },
   },
   { timestamps: true }
 );

@@ -31,4 +31,4 @@ jobpostSchema.index({
 });
 
 module.exports =
-  mongoose.models.JobPost || mongoose.model("Us-JobPost", jobpostSchema);
+  mongoose.models.JobPost || mongoose.model("Ca-JobPost", jobpostSchema);

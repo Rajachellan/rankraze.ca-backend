@@ -41,6 +41,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(
   cors({
     origin: [
+      "https://admin.rankraze.ca",
       "https://admin.rankraze.com",
       "https://development.rankraze.com",
       "https://api.rankraze.com",
@@ -53,6 +54,7 @@ app.use(
       "http://localhost:3000",
       "http://localhost:3001",
       "http://localhost:3002",
+      "http://localhost:3003",
       "http://localhost:4000",
       "https://stage.rankraze.com",
       "https://rankraze.com",
