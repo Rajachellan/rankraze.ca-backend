@@ -8,4 +8,4 @@ const caseStudiesSchema = new mongoose.Schema({
   publishedDate: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("Us-CaseStudy", caseStudiesSchema);
+module.exports = mongoose.model("Ca-CaseStudy", caseStudiesSchema);

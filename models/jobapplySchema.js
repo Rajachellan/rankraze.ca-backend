@@ -32,4 +32,4 @@ const jobapplySchema = new mongoose.Schema({
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Us-JobApply", jobapplySchema);
+module.exports = mongoose.model("Ca-JobApply", jobapplySchema);
