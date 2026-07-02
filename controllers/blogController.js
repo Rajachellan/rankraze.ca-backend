@@ -1,6 +1,8 @@
 const Blogs = require("../models/blogSchema");
 const s3Client = require("../config.js/s3Client");
 const { PutObjectCommand } = require("@aws-sdk/client-s3");
+const fs = require("fs");
+const path = require("path");
 
 /* =======================
    SLUG HELPERS
@@ -100,15 +102,39 @@ const getBlogsById = async (req, res) => {
 };
 
 /* =======================
-   R2 UPLOAD HELPER
+   UPLOAD HELPER (R2 or local disk)
 ======================= */
-async function uploadToR2(file) {
+function getPublicBaseUrl() {
+  if (process.env.BASE_URL?.trim()) {
+    return process.env.BASE_URL.trim().replace(/\/$/, "");
+  }
+  const port = process.env.PORT || 4000;
+  return `http://localhost:${port}`;
+}
+
+function hasR2Config() {
+  return Boolean(
+    process.env.R2_BUCKET_NAME &&
+      process.env.R2_ENDPOINT &&
+      process.env.R2_ACCESS_KEY_ID &&
+      process.env.R2_SECRET_ACCESS_KEY
+  );
+}
+
+async function uploadBlogImage(file) {
   if (!file) return "";
 
   const safeName = file.originalname.replace(/\s+/g, "_");
   const fileName = `${Date.now()}-${safeName}`;
-  const key = `${process.env.R2_UPLOAD_PREFIX}${fileName}`;
 
+  if (!hasR2Config()) {
+    const uploadDir = path.join(__dirname, "..", "uploads", "blogs");
+    fs.mkdirSync(uploadDir, { recursive: true });
+    fs.writeFileSync(path.join(uploadDir, fileName), file.buffer);
+    return `${getPublicBaseUrl()}/uploads/blogs/${fileName}`;
+  }
+
+  const key = `${process.env.R2_UPLOAD_PREFIX || ""}${fileName}`;
   const params = {
     Bucket: process.env.R2_BUCKET_NAME,
     Key: key,
@@ -150,7 +176,7 @@ const createBlog = async (req, res) => {
     const slug = await generateUniqueSlug(title);
     const url = `/blogs/${slug}`;
 
-    const imagePath = await uploadToR2(req.file);
+    const imagePath = await uploadBlogImage(req.file);
 
     const finalKeywords =
       keywords.length > 0
@@ -204,7 +230,7 @@ const updateBlog = async (req, res) => {
     }
 
     if (req.file) {
-      updatedData.images = await uploadToR2(req.file);
+      updatedData.images = await uploadBlogImage(req.file);
     }
 
     const updatedBlog = await Blogs.findByIdAndUpdate(
@@ -255,7 +281,7 @@ const uploadImage = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const imageUrl = await uploadToR2(req.file);
+    const imageUrl = await uploadBlogImage(req.file);
     return res.status(200).json({
       success: true,
       url: imageUrl,

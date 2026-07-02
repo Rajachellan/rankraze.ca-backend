@@ -1,4 +1,8 @@
 const mongoose = require("mongoose");
+const dns = require("dns");
+
+// Some networks block SRV lookups from Node (querySrv ECONNREFUSED); public DNS fixes Atlas mongodb+srv URIs.
+dns.setServers(["8.8.8.8", "8.8.4.4", "1.1.1.1"]);
 
 const connectDB = async () => {
   const uri = process.env.MONGO_URI;
