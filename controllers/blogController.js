@@ -158,6 +158,7 @@ const createBlog = async (req, res) => {
   try {
     const {
       title,
+      slug: customSlug,
       category,
       content,
       tags = [],
@@ -173,7 +174,18 @@ const createBlog = async (req, res) => {
       });
     }
 
-    const slug = await generateUniqueSlug(title);
+    let slug;
+    if (customSlug && customSlug.trim()) {
+      slug = slugify(customSlug);
+      let baseSlug = slug;
+      let count = 1;
+      while (await Blogs.findOne({ slug })) {
+        count++;
+        slug = `${baseSlug}-${count}`;
+      }
+    } else {
+      slug = await generateUniqueSlug(title);
+    }
     const url = `/blogs/${slug}`;
 
     const imagePath = await uploadBlogImage(req.file);
@@ -224,7 +236,19 @@ const updateBlog = async (req, res) => {
 
     const updatedData = { ...req.body };
 
-    if (updatedData.title && updatedData.title !== blog.title) {
+    if (updatedData.slug && updatedData.slug.trim()) {
+      const targetSlug = slugify(updatedData.slug);
+      if (targetSlug !== blog.slug) {
+        let slug = targetSlug;
+        let count = 1;
+        while (await Blogs.findOne({ slug, _id: { $ne: req.params.id } })) {
+          count++;
+          slug = `${targetSlug}-${count}`;
+        }
+        updatedData.slug = slug;
+        updatedData.url = `/blogs/${slug}`;
+      }
+    } else if (updatedData.title && updatedData.title !== blog.title) {
       updatedData.slug = await generateUniqueSlug(updatedData.title);
       updatedData.url = `/blogs/${updatedData.slug}`;
     }
