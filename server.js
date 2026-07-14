@@ -68,8 +68,8 @@ app.use(
   })
 );
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "25mb" }));
+app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 
 app.get("/health", (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? "Connected 🟢" : "Disconnected 🔴";
@@ -93,6 +93,23 @@ app.use("/api/auth", authRouter);
 app.use("/api", websiteportfolioRoutes);
 app.use('/api',socialMediaPortfolioRouter)
 
+// Multer / payload errors (keep CORS headers on failure responses)
+app.use((err, req, res, next) => {
+  if (err && err.name === "MulterError") {
+    const status = err.code === "LIMIT_FILE_SIZE" || err.code === "LIMIT_FIELD_VALUE" ? 413 : 400;
+    return res.status(status).json({
+      message:
+        err.code === "LIMIT_FILE_SIZE"
+          ? "Image too large. Max upload size is 20MB."
+          : err.message || "Upload failed",
+    });
+  }
+  if (err) {
+    console.error("Unhandled error:", err);
+    return res.status(err.status || 500).json({ message: err.message || "Server error" });
+  }
+  next();
+});
 
 // Webhook URL is currently not needed
 // console.log("Loaded webhook URL:", process.env.TEAMS_WEBHOOK_URL_CAREERS);
